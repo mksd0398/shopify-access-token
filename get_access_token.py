@@ -168,6 +168,13 @@ def valid_hmac(params, secret):
     return hmac.compare_digest(digest, received)
 
 
+def missing_scopes(requested, granted):
+    """Shopify omits read_X from the granted list when write_X is granted."""
+    have = set(granted.split(","))
+    have |= {"read_" + s[len("write_"):] for s in have if s.startswith("write_")}
+    return [s for s in requested if s not in have]
+
+
 def exchange_code(shop, code):
     body = json.dumps({
         "client_id": CONFIG["client_id"],
@@ -240,7 +247,7 @@ class Handler(BaseHTTPRequestHandler):
             print("granted:     " + granted)
             print("written to:  " + str(ENV_PATH) + "  [" + token_key
                   + ", SHOPIFY_STORE, SHOPIFY_ACCESS_TOKEN]\n")
-            missing = [s for s in CONFIG["scopes"] if s not in granted.split(",")]
+            missing = missing_scopes(CONFIG["scopes"], granted)
             if missing:
                 print("Requested but NOT granted: " + ", ".join(missing) + "\n")
 

@@ -26,5 +26,7 @@ assert p.read_text(encoding="utf-8") == (
 assert g.environments({"SHOPIFY_STORE_PROD": "a.myshopify.com", "SHOPIFY_STORE_STAGE": "",
                        "SHOPIFY_STORE": "a.myshopify.com"}) == {"PROD": "a.myshopify.com"}
 
+assert g.missing_scopes(["read_products", "read_analytics"], "write_products") == ["read_analytics"]
+
 assert g.normalize_shop("https://My-Store.myshopify.com/admin") == "my-store.myshopify.com"
 print("ok")
